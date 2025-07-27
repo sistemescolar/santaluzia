@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel de Navegação</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }
+
+    /* MENU LATERAL */
+    .menu-lateral {
+      width: 200px;
+      background-color: #222;
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-lateral h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .menu-lateral a {
+      color: white;
+      text-decoration: none;
+      margin: 10px 0;
+      display: block;
+      padding: 8px;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+
+    .menu-lateral a:hover {
+      background-color: #444;
+    }
+
+    /* CONTEÚDO PRINCIPAL */
+    .painel {
+      flex-grow: 1;
+      padding: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .botao {
+      padding: 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .botao:hover {
+      transform: scale(1.05);
+    }
+
+    .vermelho { background-color: #e74c3c; }
+    .azul { background-color: #3498db; }
+    .verde { background-color: #2ecc71; }
+    .laranja { background-color: #e67e22; }
+    .roxo { background-color: #9b59b6; }
+    .amarelo { background-color: #f1c40f; color: #000; }
+    .cinza { background-color: #7f8c8d; }
+    .rosa { background-color: #fd79a8; }
+  </style>
+</head>
+<body>
+
+  <div class="menu-lateral">
+    <h2>Menu</h2>
+    <a href="https://sistemescolar.github.io/master/.html">home</a>
+    <a href="quemsomos.html">quem somos</a>
+    <a href="objetivos.html">objetivos</a>
+    <a href="metodologia.html">metodologia</a>
+    <a href="contatos.html">contatos</a>
+  </div>
+
+  <div class="painel">
+    <button class="botao azul" onclick="window.location.href='ano_letivo.html'">ANO LETIVO </button>
+ <button class="botao vermelho" onclick="window.location.href='funcionarios.html'">CADASTRAR FUNCIONARIOS</button>
+
+    <button class="botao roxo" onclick="window.location.href='cadaluno.html'">CADASTRAR ALUNO</button>
+    <button class="botao verde" onclick="window.location.href='declaracoes.html'">EMITIR DECLARACAO</button>
+    <button class="botao laranja" onclick="window.location.href='histescolar.html'">HISTORICO ESCOLAR</button>
+ <button class="botao amarelo" onclick="window.location.href='lfuncionarios.html'">LIESTA DE FUNCIONARIOS</button>
+ <button class="botao cinza" onclick="window.location.href='backup.html'">BACKUP DO SISTEMA </button>
+ <button class="botao rosa" onclick="window.location.href='https://sistemescolar.github.io/master/'">SAIR</button>
+  </div>
+
+</body>
+</html>
+

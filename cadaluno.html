@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CADASTRO DE ALUNOS</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }
+
+    /* MENU LATERAL */
+    .menu-lateral {
+      width: 200px;
+      background-color: #222;
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-lateral h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .menu-lateral a {
+      color: white;
+      text-decoration: none;
+      margin: 10px 0;
+      display: block;
+      padding: 8px;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+
+    .menu-lateral a:hover {
+      background-color: #444;
+    }
+
+    /* CONTEÚDO PRINCIPAL */
+    .painel {
+      flex-grow: 1;
+      padding: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .botao {
+      padding: 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .botao:hover {
+      transform: scale(1.05);
+    }
+
+    .vermelho { background-color: #e74c3c; }
+    .azul { background-color: #3498db; }
+    .verde { background-color: #2ecc71; }
+    .laranja { background-color: #e67e22; }
+    .roxo { background-color: #9b59b6; }
+    .amarelo { background-color: #f1c40f; color: #000; }
+    .cinza { background-color: #7f8c8d; }
+    .rosa { background-color: #fd79a8; }
+  </style>
+</head>
+<body>
+
+  <div class="menu-lateral">
+    <h2>Menu</h2>
+    <a href="inicio.html">home</a>
+    <a href="quemsomos.html">quem somos</a>
+    <a href="objetivos.html">objetivos</a>
+    <a href="metodologia.html">metodologia</a>
+    <a href="contatos.html">contatos</a>
+  </div>
+
+  <div>
+<form id="formCadastro" onsubmit="salvarAluno(event)">
+  <input type="text" id="nomeAluno" placeholder="Nome do Aluno" required />
+  <input type="date" id="dataNascimento" required />
+  <input type="text" id="nomeMae" placeholder="Nome da Mãe" required />
+  <input type="text" id="nomePai" placeholder="Nome do Pai" required />
+  <input type="text" id="endereco" placeholder="Endereço" required />
+  <select id="serie" required>
+    <option value="">Selecione a Série</option>
+    <option value="1º Ano">1º Ano</option>
+    <option value="2º Ano">2º Ano</option>
+    <option value="3º Ano">3º Ano</option>
+    <option value="4º Ano">4º Ano</option>
+    <option value="5º Ano">5º Ano</option>
+  </select>
+  <button type="submit">Salvar Aluno</button>
+</form>
+
+<h2>Alunos Cadastrados</h2>
+<input type="text" id="filtroNome" placeholder="Pesquisar aluno pelo nome..." oninput="filtrarAlunos()" />
+
+<ul id="listaAlunos"></ul>
+</div>
+<script>
+  function salvarAluno(event) {
+    event.preventDefault();
+    const aluno = {
+      id: Date.now(),
+      nome: document.getElementById('nomeAluno').value.trim(),
+      nascimento: document.getElementById('dataNascimento').value,
+      mae: document.getElementById('nomeMae').value.trim(),
+      pai: document.getElementById('nomePai').value.trim(),
+      endereco: document.getElementById('endereco').value.trim(),
+      serie: document.getElementById('serie').value,
+      historico: []
+    };
+    localStorage.setItem('aluno-' + aluno.id, JSON.stringify(aluno));
+    alert(`Aluno ${aluno.nome} cadastrado com sucesso!`);
+    document.getElementById('formCadastro').reset();
+    carregarListaAlunos();
+  }
+
+  function carregarListaAlunos(filtro = '') {
+    const ul = document.getElementById('listaAlunos');
+    ul.innerHTML = '';
+    const filtroLower = filtro.toLowerCase();
+    for (let key in localStorage) {
+      if (localStorage.hasOwnProperty(key) && key.startsWith('aluno-')) {
+        const aluno = JSON.parse(localStorage.getItem(key));
+        if (aluno.nome.toLowerCase().includes(filtroLower)) {
+          adicionarAlunoNaLista(aluno);
+        }
+      }
+    }
+  }
+
+  function adicionarAlunoNaLista(aluno) {
+    const ul = document.getElementById('listaAlunos');
+    const li = document.createElement('li');
+
+    const link = document.createElement('a');
+    link.textContent = aluno.nome + " (" + aluno.serie + ")";
+    link.href = "#";
+    link.onclick = (e) => {
+      e.preventDefault();
+      abrirAluno(aluno.id);
+    };
+
+    const btnExcluir = document.createElement('button');
+    btnExcluir.textContent = 'Excluir';
+    btnExcluir.className = 'excluir';
+    btnExcluir.onclick = () => {
+      if (confirm(`Deseja realmente excluir o aluno ${aluno.nome}?`)) {
+        localStorage.removeItem('aluno-' + aluno.id);
+        carregarListaAlunos(document.getElementById('filtroNome').value);
+      }
+    };
+
+    li.appendChild(link);
+    li.appendChild(btnExcluir);
+    ul.appendChild(li);
+  }
+
+  function filtrarAlunos() {
+    const filtro = document.getElementById('filtroNome').value;
+    carregarListaAlunos(filtro);
+  }
+
+  // Função que "gera" uma nova página para o aluno, abrindo um popup com as infos
+  function abrirAluno(id) {
+    const aluno = JSON.parse(localStorage.getItem('aluno-' + id));
+    if (!aluno) {
+      alert("Aluno não encontrado");
+      return;
+    }
+
+    const conteudo = `
+      <html>
+      <head>
+        <title>Aluno: ${aluno.nome}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; max-width: 700px; }
+          table, th, td { border: 1px solid black; border-collapse: collapse; padding: 6px; }
+          table { width: 100%; margin-top: 15px; }
+          form input, form select { margin-bottom: 10px; padding: 6px; width: 100%; max-width: 400px; box-sizing: border-box; }
+          button { padding: 8px 15px; background-color: #27ae60; border: none; color: white; border-radius: 5px; cursor: pointer; }
+          button:hover { background-color: #1e8449; }
+        </style>
+      </head>
+      <body>
+        <h2>Histórico Escolar - ${aluno.nome}</h2>
+        <p><b>Nome:</b> ${aluno.nome}</p>
+        <p><b>Data de Nascimento:</b> ${aluno.nascimento}</p>
+        <p><b>Mãe:</b> ${aluno.mae}</p>
+        <p><b>Pai:</b> ${aluno.pai}</p>
+        <p><b>Endereço:</b> ${aluno.endereco}</p>
+        <p><b>Série:</b> ${aluno.serie}</p>
+
+        <table id="tabelaHistorico">
+          <thead>
+            <tr>
+              <th>Série</th><th>Ano Letivo</th><th>Escola</th><th>Português</th><th>Matemática</th>
+              <th>Geografia</th><th>História</th><th>Ciências</th><th>Arte</th><th>Educação Física</th><th>Religião</th>
+              <th>Carga Horária</th><th>Situação</th><th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <h3>Adicionar/Editar Linha do Histórico</h3>
+        <form id="formHistorico">
+          <input type="text" id="serie" placeholder="Série" required />
+          <input type="text" id="anoLetivo" placeholder="Ano Letivo" required />
+          <input type="text" id="escola" placeholder="Escola" required />
+          <input type="text" id="portugues" placeholder="Português" required />
+          <input type="text" id="matematica" placeholder="Matemática" required />
+          <input type="text" id="geografia" placeholder="Geografia" required />
+          <input type="text" id="historia" placeholder="História" required />
+          <input type="text" id="ciencias" placeholder="Ciências" required />
+          <input type="text" id="arte" placeholder="Arte" required />
+          <input type="text" id="educacaoFisica" placeholder="Educação Física" required />
+          <input type="text" id="religiao" placeholder="Religião" required />
+          <input type="text" id="cargaHoraria" placeholder="Carga Horária" required />
+          <input type="text" id="situacao" placeholder="Situação do Aluno" required />
+          <button type="submit">Salvar Linha</button>
+        </form>
+
+        <script>
+          const alunoId = ${aluno.id};
+          let editIndex = -1;
+
+          function atualizarTabela() {
+            const aluno = JSON.parse(localStorage.getItem('aluno-' + alunoId));
+            const tbody = document.querySelector('#tabelaHistorico tbody');
+            tbody.innerHTML = '';
+            aluno.historico.forEach((linha, index) => {
+              const tr = document.createElement('tr');
+              tr.innerHTML = \`
+                <td>\${linha.serie}</td>
+                <td>\${linha.anoLetivo}</td>
+                <td>\${linha.escola}</td>
+                <td>\${linha.portugues}</td>
+                <td>\${linha.matematica}</td>
+                <td>\${linha.geografia}</td>
+                <td>\${linha.historia}</td>
+                <td>\${linha.ciencias}</td>
+                <td>\${linha.arte}</td>
+                <td>\${linha.educacaoFisica}</td>
+                <td>\${linha.religiao}</td>
+                <td>\${linha.cargaHoraria}</td>
+                <td>\${linha.situacao}</td>
+                <td><button onclick="editarLinha(\${index})">Editar</button></td>
+              \`;
+              tbody.appendChild(tr);
+            });
+          }
+
+          function editarLinha(index) {
+            const aluno = JSON.parse(localStorage.getItem('aluno-' + alunoId));
+            const linha = aluno.historico[index];
+            editIndex = index;
+
+            document.getElementById('serie').value = linha.serie;
+            document.getElementById('anoLetivo').value = linha.anoLetivo;
+            document.getElementById('escola').value = linha.escola;
+            document.getElementById('portugues').value = linha.portugues;
+            document.getElementById('matematica').value = linha.matematica;
+            document.getElementById('geografia').value = linha.geografia;
+            document.getElementById('historia').value = linha.historia;
+            document.getElementById('ciencias').value = linha.ciencias;
+            document.getElementById('arte').value = linha.arte;
+            document.getElementById('educacaoFisica').value = linha.educacaoFisica;
+            document.getElementById('religiao').value = linha.religiao;
+            document.getElementById('cargaHoraria').value = linha.cargaHoraria;
+            document.getElementById('situacao').value = linha.situacao;
+          }
+
+          document.getElementById('formHistorico').onsubmit = function(e) {
+            e.preventDefault();
+            const aluno = JSON.parse(localStorage.getItem('aluno-' + alunoId));
+
+            const novaLinha = {
+              serie: document.getElementById('serie').value,
+              anoLetivo: document.getElementById('anoLetivo').value,
+              escola: document.getElementById('escola').value,
+              portugues: document.getElementById('portugues').value,
+              matematica: document.getElementById('matematica').value,
+              geografia: document.getElementById('geografia').value,
+              historia: document.getElementById('historia').value,
+              ciencias: document.getElementById('ciencias').value,
+              arte: document.getElementById('arte').value,
+              educacaoFisica: document.getElementById('educacaoFisica').value,
+              religiao: document.getElementById('religiao').value,
+              cargaHoraria: document.getElementById('cargaHoraria').value,
+              situacao: document.getElementById('situacao').value
+            };
+
+            if (editIndex === -1) {
+              aluno.historico.push(novaLinha);
+            } else {
+              aluno.historico[editIndex] = novaLinha;
+              editIndex = -1;
+            }
+
+            localStorage.setItem('aluno-' + alunoId, JSON.stringify(aluno));
+            atualizarTabela();
+            this.reset();
+          };
+
+          atualizarTabela();
+        <\/script>
+      </body>
+      </html>
+    `;
+
+    const novaJanela = window.open('', '_blank');
+    novaJanela.document.write(conteudo);
+    novaJanela.document.close();
+  }
+
+  // Inicializa lista sem filtro ao carregar a página
+  window.onload = () => carregarListaAlunos();
+</script>
+</body>
+</html>
+

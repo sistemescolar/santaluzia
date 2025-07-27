@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel de Navegação</title>
+  <style>
+ h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #3498db;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f4f4f4;
+    }
+    #msgVazio {
+      text-align: center;
+      font-style: italic;
+      color: #777;
+    }
+    button {
+      display: block;
+      margin: 0 auto 20px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #219150;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }
+
+    /* MENU LATERAL */
+    .menu-lateral {
+      width: 200px;
+      background-color: #222;
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-lateral h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .menu-lateral a {
+      color: white;
+      text-decoration: none;
+      margin: 10px 0;
+      display: block;
+      padding: 8px;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+
+    .menu-lateral a:hover {
+      background-color: #444;
+    }
+
+    /* CONTEÚDO PRINCIPAL */
+    .painel {
+      flex-grow: 1;
+      padding: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .botao {
+      padding: 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .botao:hover {
+      transform: scale(1.05);
+    }
+
+    .vermelho { background-color: #e74c3c; }
+    .azul { background-color: #3498db; }
+    .verde { background-color: #2ecc71; }
+    .laranja { background-color: #e67e22; }
+    .roxo { background-color: #9b59b6; }
+    .amarelo { background-color: #f1c40f; color: #000; }
+    .cinza { background-color: #7f8c8d; }
+    .rosa { background-color: #fd79a8; }
+  </style>
+</head>
+<body>
+
+  <div class="menu-lateral">
+    <h2>Menu</h2>
+    <a href="inicio.html">home</a>
+    <a href="quemsomos.html">quem somos</a>
+    <a href="objetivos.html">objetivos</a>
+    <a href="metodologia.html">metodologia</a>
+    <a href="contatos.html">contatos</a>
+  </div>
+
+  <div>
+ <h1>Lista de Funcionários Cadastrados</h1>
+
+  <button onclick="exportarPDF()">Exportar para PDF</button>
+
+  <table id="tabelaFuncionarios">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Data de Nascimento</th>
+        <th>Nome do Pai</th>
+        <th>Nome da Mãe</th>
+        <th>Endereço</th>
+        <th>Função</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Linhas dos funcionários serão inseridas aqui -->
+    </tbody>
+  </table>
+
+  <div id="msgVazio" style="display:none;">Nenhum funcionário cadastrado.</div>
+
+  <!-- Importar jsPDF e autoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+    function carregarFuncionarios() {
+      const tbody = document.querySelector('#tabelaFuncionarios tbody');
+      tbody.innerHTML = '';
+      let count = 0;
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('funcionario-')) {
+          const func = JSON.parse(localStorage.getItem(key));
+          const tr = document.createElement('tr');
+
+          tr.innerHTML = `
+            <td>${func.nome}</td>
+            <td>${func.nascimento}</td>
+            <td>${func.nomePai || ''}</td>
+            <td>${func.nomeMae}</td>
+            <td>${func.endereco}</td>
+            <td>${func.funcao}</td>
+          `;
+
+          tbody.appendChild(tr);
+          count++;
+        }
+      }
+
+      document.getElementById('msgVazio').style.display = count === 0 ? 'block' : 'none';
+    }
+
+    async function exportarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Pega os dados da tabela
+      const headers = [["Nome", "Data Nascimento", "Nome do Pai", "Nome da Mãe", "Endereço", "Função"]];
+      const data = [];
+      const rows = document.querySelectorAll("#tabelaFuncionarios tbody tr");
+
+      if (rows.length === 0) {
+        alert('Não há funcionários para exportar.');
+        return;
+      }
+
+      rows.forEach(row => {
+        const rowData = [];
+        row.querySelectorAll("td").forEach(td => {
+          rowData.push(td.textContent);
+        });
+        data.push(rowData);
+      });
+
+      doc.setFontSize(18);
+      doc.text("Lista de Funcionários", 14, 22);
+
+      doc.autoTable({
+        startY: 30,
+        head: headers,
+        body: data,
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [52, 152, 219] }
+      });
+
+      doc.save("lista_funcionarios.pdf");
+    }
+
+    window.onload = carregarFuncionarios;
+  </script>
+
+
+  </div>
+
+</body>
+</html>
+

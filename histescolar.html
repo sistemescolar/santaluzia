@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel de Navegação</title>
+  <style>
+    input[type="text"] {
+      width: 300px;
+      padding: 8px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    button {
+      padding: 8px 15px;
+      font-size: 16px;
+      background-color: #3498db;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    #historico {
+      margin-top: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #333;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #eee;
+    }
+    #mensagemErro {
+      color: red;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }
+
+    /* MENU LATERAL */
+    .menu-lateral {
+      width: 200px;
+      background-color: #222;
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-lateral h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .menu-lateral a {
+      color: white;
+      text-decoration: none;
+      margin: 10px 0;
+      display: block;
+      padding: 8px;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+
+    .menu-lateral a:hover {
+      background-color: #444;
+    }
+
+    /* CONTEÚDO PRINCIPAL */
+    .painel {
+      flex-grow: 1;
+      padding: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .botao {
+      padding: 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .botao:hover {
+      transform: scale(1.05);
+    }
+
+    .vermelho { background-color: #e74c3c; }
+    .azul { background-color: #3498db; }
+    .verde { background-color: #2ecc71; }
+    .laranja { background-color: #e67e22; }
+    .roxo { background-color: #9b59b6; }
+    .amarelo { background-color: #f1c40f; color: #000; }
+    .cinza { background-color: #7f8c8d; }
+    .rosa { background-color: #fd79a8; }
+  </style>
+</head>
+<body>
+
+  <div class="menu-lateral">
+    <h2>Menu</h2>
+    <a href="inicio.html">home</a>
+    <a href="quemsomos.html">quem somos</a>
+    <a href="objetivos.html">objetivos</a>
+    <a href="metodologia.html">metodologia</a>
+    <a href="contatos.html">contatos</a>
+  </div>
+
+  <div>
+
+  <h1>Consulta de Histórico Escolar</h1>
+  <input type="text" id="inputNome" placeholder="Digite o nome do aluno" />
+  <button onclick="gerarHistorico()">Buscar Histórico</button>
+
+  <div id="mensagemErro"></div>
+  <div id="historico"></div>
+  <button id="btnPDF" style="display:none" onclick="baixarPDF()">Baixar PDF</button>
+
+  <!-- jsPDF CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script>
+    const { jsPDF } = window.jspdf;
+
+    function normaliza(texto) {
+      return texto.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function gerarHistorico() {
+      const nomeBusca = document.getElementById('inputNome').value.trim();
+      const historicoDiv = document.getElementById('historico');
+      const mensagemErro = document.getElementById('mensagemErro');
+      const btnPDF = document.getElementById('btnPDF');
+
+      historicoDiv.innerHTML = '';
+      mensagemErro.textContent = '';
+      btnPDF.style.display = 'none';
+
+      if (!nomeBusca) {
+        mensagemErro.textContent = 'Por favor, digite o nome do aluno.';
+        return;
+      }
+
+      let alunoEncontrado = null;
+      for (let key in localStorage) {
+        if (localStorage.hasOwnProperty(key) && key.startsWith('aluno-')) {
+          const aluno = JSON.parse(localStorage.getItem(key));
+          if (normaliza(aluno.nome) === normaliza(nomeBusca)) {
+            alunoEncontrado = aluno;
+            break;
+          }
+        }
+      }
+
+      if (!alunoEncontrado) {
+        mensagemErro.textContent = `O ALUNO(A) "${nomeBusca.toUpperCase()}" NÃO ESTÁ CADASTRADO NESTA ESCOLA.`;
+        return;
+      }
+
+      if (!alunoEncontrado.historico || alunoEncontrado.historico.length === 0) {
+        mensagemErro.textContent = `O ALUNO(A) "${alunoEncontrado.nome.toUpperCase()}" NÃO POSSUI HISTÓRICO ESCOLAR CADASTRADO.`;
+        return;
+      }
+
+      // Montar tabela
+      let tabela = `
+        <h2>Histórico Escolar de ${alunoEncontrado.nome}</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Série</th>
+              <th>Ano Letivo</th>
+              <th>Escola</th>
+              <th>Português</th>
+              <th>Matemática</th>
+              <th>Geografia</th>
+              <th>História</th>
+              <th>Ciências</th>
+              <th>Arte</th>
+              <th>Educação Física</th>
+              <th>Religião</th>
+              <th>Carga Horária</th>
+              <th>Situação</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      alunoEncontrado.historico.forEach(registro => {
+        tabela += `
+          <tr>
+            <td>${registro.serie || '-'}</td>
+            <td>${registro.anoLetivo || '-'}</td>
+            <td>${registro.escola || '-'}</td>
+            <td>${registro.portugues || '-'}</td>
+            <td>${registro.matematica || '-'}</td>
+            <td>${registro.geografia || '-'}</td>
+            <td>${registro.historia || '-'}</td>
+            <td>${registro.ciencias || '-'}</td>
+            <td>${registro.arte || '-'}</td>
+            <td>${registro.educacaoFisica || '-'}</td>
+            <td>${registro.religiao || '-'}</td>
+            <td>${registro.cargaHoraria || '-'}</td>
+            <td>${registro.situacao || '-'}</td>
+          </tr>
+        `;
+      });
+
+      tabela += '</tbody></table>';
+      historicoDiv.innerHTML = tabela;
+      btnPDF.style.display = 'inline-block';
+    }
+
+    function baixarPDF() {
+      const doc = new jsPDF();
+
+      const nomeAluno = document.getElementById('inputNome').value.trim();
+      if (!nomeAluno) return alert('Digite o nome do aluno para gerar PDF.');
+
+      // Para exportar a tabela como texto, vamos montar uma string
+      let texto = `Histórico Escolar de ${nomeAluno.toUpperCase()}\n\n`;
+
+      // Vamos pegar a tabela e extrair os dados para texto plano
+      const tabela = document.querySelector('#historico table');
+      if (!tabela) return alert('Nenhum histórico para exportar.');
+
+      // Cabeçalhos
+      const headers = [];
+      tabela.querySelectorAll('thead th').forEach(th => headers.push(th.textContent));
+      texto += headers.join('\t') + '\n';
+
+      // Linhas
+      tabela.querySelectorAll('tbody tr').forEach(tr => {
+        const cols = [];
+        tr.querySelectorAll('td').forEach(td => cols.push(td.textContent));
+        texto += cols.join('\t') + '\n';
+      });
+
+      // Ajuste para largura máxima da página (180mm)
+      const linhas = doc.splitTextToSize(texto, 180);
+      doc.setFontSize(12);
+      doc.text(linhas, 10, 20);
+      doc.save(`historico_escolar_${nomeAluno.replace(/\s+/g, '_')}.pdf`);
+    }
+  </script>
+  </div>
+
+</body>
+</html>
+

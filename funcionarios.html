@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel de Navegação</title>
+  <style>
+         h1 {
+      text-align: center;
+    }
+    form {
+      margin-bottom: 20px;
+      background: #f4f4f4;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="date"] {
+      width: 100%;
+      padding: 7px;
+      margin-top: 5px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #3498db;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    ul#listaFuncionarios {
+      list-style: none;
+      padding: 0;
+    }
+    ul#listaFuncionarios li {
+      background: #e9e9e9;
+      margin-bottom: 8px;
+      padding: 10px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
+    }
+    .btn-group button {
+      margin-left: 8px;
+      padding: 5px 12px;
+      font-size: 14px;
+      border-radius: 4px;
+    }
+    .btn-editar {
+      background-color: #f39c12;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+    .btn-editar:hover {
+      background-color: #d78a0e;
+    }
+    .btn-excluir {
+      background-color: #e74c3c;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+    .btn-excluir:hover {
+      background-color: #c0392b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }
+
+    /* MENU LATERAL */
+    .menu-lateral {
+      width: 200px;
+      background-color: #222;
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-lateral h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .menu-lateral a {
+      color: white;
+      text-decoration: none;
+      margin: 10px 0;
+      display: block;
+      padding: 8px;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+
+    .menu-lateral a:hover {
+      background-color: #444;
+    }
+
+    /* CONTEÚDO PRINCIPAL */
+    .painel {
+      flex-grow: 1;
+      padding: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .botao {
+      padding: 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .botao:hover {
+      transform: scale(1.05);
+    }
+
+    .vermelho { background-color: #e74c3c; }
+    .azul { background-color: #3498db; }
+    .verde { background-color: #2ecc71; }
+    .laranja { background-color: #e67e22; }
+    .roxo { background-color: #9b59b6; }
+    .amarelo { background-color: #f1c40f; color: #000; }
+    .cinza { background-color: #7f8c8d; }
+    .rosa { background-color: #fd79a8; }
+  </style>
+</head>
+<body>
+
+  <div class="menu-lateral">
+    <h2>Menu</h2>
+    <a href="inicio.html">home</a>
+    <a href="quemsomos.html">quem somos</a>
+    <a href="objetivos.html">objetivos</a>
+    <a href="metodologia.html">metodologia</a>
+    <a href="contatos.html">contatos</a>
+  </div>
+
+  <div>
+  <h1>Cadastro de Funcionários</h1>
+
+  <form id="formFuncionario" onsubmit="salvarFuncionario(event)">
+    <input type="hidden" id="funcionarioId" />
+    
+    <label for="nome">Nome *</label>
+    <input type="text" id="nome" required />
+
+    <label for="dataNascimento">Data de Nascimento *</label>
+    <input type="date" id="dataNascimento" required />
+
+    <label for="nomePai">Nome do Pai</label>
+    <input type="text" id="nomePai" placeholder="Opcional" />
+
+    <label for="nomeMae">Nome da Mãe *</label>
+    <input type="text" id="nomeMae" required />
+
+    <label for="endereco">Endereço *</label>
+    <input type="text" id="endereco" required />
+
+    <label for="funcao">Função *</label>
+    <input type="text" id="funcao" required />
+
+    <button type="submit">Salvar Funcionário</button>
+  </form>
+
+  <h2>Lista de Funcionários</h2>
+  <ul id="listaFuncionarios"></ul>
+
+  <script>
+    // Função para gerar ID único simples
+    function gerarId() {
+      return 'funcionario-' + Date.now();
+    }
+
+    function salvarFuncionario(event) {
+      event.preventDefault();
+
+      const idCampo = document.getElementById('funcionarioId');
+      const nome = document.getElementById('nome').value.trim();
+      const nascimento = document.getElementById('dataNascimento').value;
+      const nomePai = document.getElementById('nomePai').value.trim();
+      const nomeMae = document.getElementById('nomeMae').value.trim();
+      const endereco = document.getElementById('endereco').value.trim();
+      const funcao = document.getElementById('funcao').value.trim();
+
+      if (!nome || !nascimento || !nomeMae || !endereco || !funcao) {
+        alert('Por favor, preencha todos os campos obrigatórios (*)');
+        return;
+      }
+
+      const funcionario = {
+        id: idCampo.value || gerarId(),
+        nome,
+        nascimento,
+        nomePai,
+        nomeMae,
+        endereco,
+        funcao
+      };
+
+      localStorage.setItem(funcionario.id, JSON.stringify(funcionario));
+
+      limparFormulario();
+      carregarFuncionarios();
+    }
+
+    function limparFormulario() {
+      document.getElementById('funcionarioId').value = '';
+      document.getElementById('formFuncionario').reset();
+    }
+
+    function carregarFuncionarios() {
+      const lista = document.getElementById('listaFuncionarios');
+      lista.innerHTML = '';
+
+      // Percorrer localStorage e filtrar só funcionários (chaves que começam com 'funcionario-')
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('funcionario-')) {
+          const func = JSON.parse(localStorage.getItem(key));
+
+          const li = document.createElement('li');
+          li.textContent = `${func.nome} (${func.funcao})`;
+
+          const btnGroup = document.createElement('span');
+          btnGroup.classList.add('btn-group');
+
+          // Botão Editar
+          const btnEditar = document.createElement('button');
+          btnEditar.textContent = 'Editar';
+          btnEditar.classList.add('btn-editar');
+          btnEditar.onclick = () => editarFuncionario(func.id);
+
+          // Botão Excluir
+          const btnExcluir = document.createElement('button');
+          btnExcluir.textContent = 'Excluir';
+          btnExcluir.classList.add('btn-excluir');
+          btnExcluir.onclick = () => excluirFuncionario(func.id);
+
+          btnGroup.appendChild(btnEditar);
+          btnGroup.appendChild(btnExcluir);
+
+          li.appendChild(btnGroup);
+          lista.appendChild(li);
+        }
+      }
+    }
+
+    function editarFuncionario(id) {
+      const funcionario = JSON.parse(localStorage.getItem(id));
+      if (!funcionario) {
+        alert('Funcionário não encontrado!');
+        return;
+      }
+
+      document.getElementById('funcionarioId').value = funcionario.id;
+      document.getElementById('nome').value = funcionario.nome;
+      document.getElementById('dataNascimento').value = funcionario.nascimento;
+      document.getElementById('nomePai').value = funcionario.nomePai;
+      document.getElementById('nomeMae').value = funcionario.nomeMae;
+      document.getElementById('endereco').value = funcionario.endereco;
+      document.getElementById('funcao').value = funcionario.funcao;
+
+      window.scrollTo(0, 0);
+    }
+
+    function excluirFuncionario(id) {
+      if (confirm('Deseja realmente excluir este funcionário?')) {
+        localStorage.removeItem(id);
+        carregarFuncionarios();
+      }
+    }
+
+    // Carregar a lista ao abrir a página
+    window.onload = carregarFuncionarios;
+  </script>
+  </div>
+
+</body>
+</html>
+

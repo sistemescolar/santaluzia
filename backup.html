@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel de Navegação</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }
+
+    /* MENU LATERAL */
+    .menu-lateral {
+      width: 200px;
+      background-color: #222;
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-lateral h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .menu-lateral a {
+      color: white;
+      text-decoration: none;
+      margin: 10px 0;
+      display: block;
+      padding: 8px;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+
+    .menu-lateral a:hover {
+      background-color: #444;
+    }
+
+    .botao {
+      padding: 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      color: black;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .botao:hover {
+      transform: scale(1.05);
+    }
+
+    button, input[type="file"] {
+      display: block;
+      margin: 20px auto;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    .export-btn {
+      background-color: #2ecc71;
+      color: white;
+      align: center;
+      heght: 20px;
+      width: 200px;
+    }
+    .import-btn {
+background-color: #2ecc71;
+      color: white;
+      align: center;
+      heght: 20px;
+      width: 200px;    }
+
+    .file-input {
+background-color: #f4f4f4;
+      color: white;
+      align: center;
+      heght: 20px;
+      width: 200px;
+      text-color: black;
+    }
+    .message {
+      text-align: center;
+      color: black;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+
+  </style>
+</head>
+<body>
+
+  <div class="menu-lateral">
+    <h2>Menu</h2>
+    <a href="inicio.html">home</a>
+    <a href="quemsomos.html">quem somos</a>
+    <a href="objetivos.html">objetivos</a>
+    <a href="metodologia.html">metodologia</a>
+    <a href="contatos.html">contatos</a>
+  </div>
+<div>
+  <p><button class="export-btn" onclick="exportarBackup()">Exportar Backup</button></p>
+
+  <div class="file-input">
+    <p><input type="file" id="arquivoBackup" accept=".json" /></p>
+    <p><button class="import-btn" onclick="importarBackup()">Importar Backup</button></p>
+  </div>
+
+  <div id="mensagem" class="message"></div>
+</div>
+  <script>
+    function exportarBackup() {
+      const dados = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const chave = localStorage.key(i);
+        dados[chave] = localStorage.getItem(chave);
+      }
+
+      const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "backup_escolar.json";
+      a.click();
+      URL.revokeObjectURL(url);
+
+      document.getElementById("mensagem").textContent = "Backup exportado com sucesso!";
+    }
+
+    function importarBackup() {
+      const input = document.getElementById("arquivoBackup");
+      const file = input.files[0];
+
+      if (!file) {
+        alert("Selecione um arquivo de backup .json para importar.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const dadosImportados = JSON.parse(e.target.result);
+          for (const chave in dadosImportados) {
+            localStorage.setItem(chave, dadosImportados[chave]);
+          }
+          document.getElementById("mensagem").textContent = "Backup restaurado com sucesso!";
+        } catch (error) {
+          alert("Erro ao importar backup. Verifique se o arquivo está correto.");
+        }
+      };
+      reader.readAsText(file);
+    }
+  </script>
+
+</body>
+</html>
+
